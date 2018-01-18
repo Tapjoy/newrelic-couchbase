@@ -1,4 +1,5 @@
 require 'new_relic/agent/method_tracer'
+require 'new_relic/agent/datastores'
 
 DependencyDetection.defer do
   @name = :couchbase

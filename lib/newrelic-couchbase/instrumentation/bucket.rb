@@ -1,34 +1,60 @@
-::Couchbase::Bucket.class_eval do
-  include NewRelic::Agent::MethodTracer
+module NewRelic
+  module Agent
+    module Instrumentation
+      module Couchbase
+        def get_set_callback(statement)
+          Proc.new do |result, scoped_metric, elapsed|
+            NewRelic::Agent::Datastores.notice_statement(statement, elapsed)
+          end
+        end
 
-  # https://code.google.com/p/memcached/wiki/BinaryProtocolRevamped#Introduction
+        def set_with_newrelic(*args, &blk)
+          NewRelic::Agent::Datastores.wrap('Couchbase', 'set', name, get_set_callback(args.inspect)) do
+            set_without_newrelic(*args, &blk)
+          end
+        end
+
+        def get_with_newrelic(*args, &blk)
+          NewRelic::Agent::Datastores.wrap('Couchbase', 'get', name, get_set_callback(args.inspect)) do
+            get_without_newrelic(*args, &blk)
+          end
+        end
+      end
+    end
+  end
+end
+
+
+::Couchbase::Bucket.class_eval do
+  include NewRelic::Agent::Instrumentation::Couchbase
+  alias_method :set_without_newrelic, :set
+  alias_method :set, :set_with_newrelic
+  alias_method :get_without_newrelic, :get
+  alias_method :get, :get_with_newrelic
+
   [
-    :get,
-    :set,
+    :cas,
+    :compare_and_swap,
     :add,
     :replace,
     :delete,
+    :incr,
     :increment,
+    :decr,
     :decrement,
     :flush,
     :append,
     :prepend,
     :touch,
     :stats,
-    :run
+    :run,
+    :design_docs,
+    :save_design_doc,
+    :delete_design_doc,
+    :observe_and_wait,
+    :create_timer,
+    :create_periodic_timer
   ].each do |instruction|
-    add_method_tracer instruction, "Couchbase/Bucket/#{instruction.to_s}"
+    NewRelic::Agent::Datastores.trace self, instruction, "Couchbase"
   end
-
-  add_method_tracer :incr, "Couchbase/Bucket/increment"
-  add_method_tracer :decr, "Couchbase/Bucket/decrement"
-
-  add_method_tracer :cas,                   'Couchbase/Bucket/compare_and_swap'
-  add_method_tracer :compare_and_swap,      'Couchbase/Bucket/compare_and_swap'
-  add_method_tracer :design_docs,           'Couchbase/Bucket/design_docs'
-  add_method_tracer :save_design_doc,       'Couchbase/Bucket/save_design_doc'
-  add_method_tracer :delete_design_doc,     'Couchbase/Bucket/delete_design_doc'
-  add_method_tracer :observe_and_wait,      'Couchbase/Bucket/observe_and_wait'
-  add_method_tracer :create_timer,          'Couchbase/Bucket/create_timer'
-  add_method_tracer :create_periodic_timer, 'Couchbase/Bucket/create_perioidic_timer'
 end
