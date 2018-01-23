@@ -29,6 +29,16 @@ OR, the following statement can be appended to the newrelic.yml file
   disable_couchbase: true
 ```
 
+## Reporting
+
+On the bucket level, we've modified how `get` and `set` are reported.
+We alias them to methods which then report the bucket name using  the
+`NewRelic::Agent::Datastores.wrap` API.
+
+All other transactions are reported using `NewRelic::Agent::Datastores.trace`
+and, consequently, there's no bucket name.
+
+
 ## Contributing
 
 1. Fork it

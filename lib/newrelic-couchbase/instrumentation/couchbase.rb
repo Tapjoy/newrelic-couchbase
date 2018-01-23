@@ -1,8 +1,7 @@
 ::Couchbase.module_eval do
   class << self
-    include NewRelic::Agent::MethodTracer
-
     [
+      :new,
       :connect,
       :thread_storage,
       :verify_connection!,
@@ -10,9 +9,7 @@
       :bucket,
       :bucket=
     ].each do |instruction|
-      add_method_tracer instruction, "Couchbase/Class/#{instruction.to_s}"
+      NewRelic::Agent::Datastores.trace self, instruction, "Couchbase"
     end
-
-    add_method_tracer :new, 'Couchbase/Class/connect'
   end
 end

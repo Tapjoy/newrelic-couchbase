@@ -1,5 +1,4 @@
 ::Couchbase::View.class_eval do
-  include NewRelic::Agent::MethodTracer
 
   [
     :each,
@@ -9,6 +8,6 @@
     :fetch,
     :fetch_all
   ].each do |instruction|
-    add_method_tracer instruction, "Couchbase/View/#{instruction.to_s}"
+    NewRelic::Agent::Datastores.trace self, instruction, "Couchbase"
   end
 end
