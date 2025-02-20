@@ -1,6 +1,20 @@
 ::Couchbase::Cluster.class_eval do
 
-  [:create_bucket, :delete_bucket].each do |instruction|
+  [
+    :analytics_indexes,
+    :analytics_query,
+    :bucket,
+    :buckets,
+    :diagnostics,
+    :disconnect,
+    :ping,
+    :query,
+    :query_indexes,
+    :search,
+    :search_indexes,
+    :search_query,
+    :users
+  ].each do |instruction|
     NewRelic::Agent::Datastores.trace self, instruction, "Couchbase"
   end
 end
