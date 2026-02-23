@@ -19,5 +19,5 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
 
   gem.add_dependency 'couchbase', '~> 3'
-  gem.add_dependency 'newrelic_rpm', '>= 4.5'
+  gem.add_dependency 'newrelic_rpm', '>= 9.24'
 end
