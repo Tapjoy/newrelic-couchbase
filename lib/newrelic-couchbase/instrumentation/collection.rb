@@ -4,7 +4,7 @@ module NewRelic
       module Couchbase
         def get_upsert_callback(statement)
           Proc.new do |result, scoped_metric, elapsed|
-            NewRelic::Agent::Datastores.notice_statement(statement, elapsed)
+            NewRelic::Agent::Datastores.notice_statement(statement)
           end
         end
 
